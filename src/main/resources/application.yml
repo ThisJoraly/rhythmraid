@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/rhythmraid
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+minio:
+  endpoint: http://localhost:9000
+  access:
+    key: minioadmin
+  secret:
+    key: minioadmin
+  bucket:
+    name: rhythmraid
+springdoc:
+  api-docs:
+    path: /api-docs
+
