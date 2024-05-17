@@ -6,7 +6,7 @@ spring:
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
 
 minio:
   endpoint: http://localhost:9000
