@@ -12,4 +12,8 @@ public class SongResponse {
 
     private Integer duration;
 
+    private String bucket;
+
+    private String object;
+
 }

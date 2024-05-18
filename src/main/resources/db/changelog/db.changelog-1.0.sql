@@ -24,7 +24,9 @@ CREATE TABLE song_author (
 CREATE TABLE album (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    release_date VARCHAR(255) NOT NULL
+    release_date VARCHAR(255) NOT NULL,
+    bucket VARCHAR(255) NOT NULL,
+    object VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE playlist (

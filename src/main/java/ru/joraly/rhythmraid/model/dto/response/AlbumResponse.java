@@ -11,5 +11,8 @@ public class AlbumResponse {
 
     private String releaseDate;
 
-    private List<SongResponse> songs;
+    private String bucket;
+
+    private String object;
+
 }
