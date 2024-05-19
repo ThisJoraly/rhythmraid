@@ -17,6 +17,9 @@ public class Album {
     private Long id;
     private String title;
     private String releaseDate;
+    private String bucket; //cover bucket
+    private String object; //cover file (picture)
+
 
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SongAlbum> songAlbums = new HashSet<>();

@@ -1,6 +1,6 @@
 INSERT INTO song (title, genre, duration, bucket, object)
-VALUES ('Song 1', 'Pop', 200, 'bucket1', 'path1'),
-       ('Song 2', 'Rock', 300, 'bucket2', 'path2');
+VALUES ('Song 1', 'Pop', 200, 'rhythmraid', 'example1'),
+       ('Song 2', 'Rock', 300, 'rhythmraid', 'example2');
 
 INSERT INTO author (name, country)
 VALUES ('Author 1', 'USA'),
@@ -10,9 +10,9 @@ INSERT INTO song_author (song_id, author_id)
 VALUES (1, 1),
        (2, 2);
 
-INSERT INTO album (title, release_date)
-VALUES ('Album 1', '2020-01-01'),
-       ('Album 2', '2021-01-01');
+INSERT INTO album (title, release_date, bucket, object)
+VALUES ('Album 1', '2020-01-01', 'rhythmraid', 'example3'),
+       ('Album 2', '2021-01-01', 'rhythmraid', 'example4');
 
 INSERT INTO playlist (name, position)
 VALUES ('Playlist 1', 'Top'),
