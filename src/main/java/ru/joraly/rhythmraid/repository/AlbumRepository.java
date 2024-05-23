@@ -12,9 +12,13 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
-    @NotNull
-    Optional<Album> findById(@NotNull Long id);
 
     @Query("SELECT sa.song FROM SongAlbum sa WHERE sa.album.id = :albumId")
     Set<Song> findSongsByAlbumId(@Param("albumId") Long albumId);
+
+    @Query("SELECT a.title FROM Album a WHERE a.id = :albumId")
+    String getTitleById(@Param("albumId") Long albumId);
+
+    @Query("SELECT aa.author FROM AlbumAuthor aa WHERE aa.album.id = :albumId")
+    Set<String> findAuthorsByAlbumId(@Param("albumId") Long albumId);
 }

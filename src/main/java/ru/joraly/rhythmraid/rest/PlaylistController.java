@@ -32,10 +32,8 @@ public class PlaylistController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PlaylistResponse> getPlaylistById(@PathVariable Long id) {
-        Optional<Playlist> playlist = playlistService.getById(id);
-        return playlist.map(value -> new ResponseEntity<>(playlistMapper
-                .objectToResponse(value), HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Playlist playlist = playlistService.getById(id);
+        return new ResponseEntity<>(playlistMapper.objectToResponse(playlist), HttpStatus.OK);
     }
 
     @PostMapping

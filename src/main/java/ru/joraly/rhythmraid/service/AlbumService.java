@@ -9,6 +9,6 @@ public interface AlbumService {
     Optional<Album> getById(Long id);
     List<Album> getAll();
     Album save(Album album);
-    Album replaceAlbum(Long id, Album album);
+    Album replaceAlbum(Long id, Album album) throws Exception;
     void deleteById(Long id);
 }
