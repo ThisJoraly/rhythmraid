@@ -3,7 +3,7 @@ package ru.joraly.rhythmraid.model.dto.response;
 import lombok.Data;
 
 @Data
-public class AlbumResponse {
+public class AuthorResponse {
     private Long id;
 
     private String title;
@@ -13,5 +13,4 @@ public class AlbumResponse {
     private String bucket;
 
     private String object;
-
 }
