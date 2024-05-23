@@ -1,36 +1,32 @@
-package ru.joraly.rhythmraid.service.impl;
+package ru.joraly.rhythmraid.util;
 
-import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
+import io.minio.*;
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
-import ru.joraly.rhythmraid.service.FileService;
-import ru.joraly.rhythmraid.util.FileComponent;
+import org.springframework.stereotype.Component;
+import ru.joraly.rhythmraid.configuration.MinioConfiguration;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+@Component
 @RequiredArgsConstructor
-public class FileServiceImpl implements FileService {
-    private final FileComponent fileComponent;
+public class FileComponent {
+    private final MinioClient minioClient;
+    private final MinioConfiguration minioConfiguration;
 
-    @Override
     public void uploadFile(String bucketName, String objectName, InputStream inputStream, long size) throws IOException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, ErrorResponseException, XmlParserException, InternalException, ServerException {
-        fileComponent.uploadFile(bucketName, objectName, inputStream, size);
+        minioClient.putObject(PutObjectArgs.builder().bucket(bucketName).object(objectName).stream(inputStream, size, -1).build());
     }
 
-
-    @Override
     public InputStream getFile(String bucketName, String objectName) throws IOException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, ErrorResponseException, XmlParserException, InternalException, ServerException {
-        return fileComponent.getFile(bucketName, objectName);
+        return minioClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(objectName).build());
     }
 
-    @Override
     public void deleteFile(String bucketName, String objectName) throws IOException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, ErrorResponseException, XmlParserException, InternalException, ServerException {
-        fileComponent.deleteFile(bucketName, objectName);
+        minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(objectName).build());
     }
 }
