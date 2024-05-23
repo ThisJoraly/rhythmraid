@@ -1,11 +1,15 @@
 package ru.joraly.rhythmraid.rest;
 
+import io.minio.PutObjectArgs;
+import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import org.simpleframework.xml.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import ru.joraly.rhythmraid.configuration.MinioConfiguration;
 import ru.joraly.rhythmraid.mapper.AlbumMapper;
 import ru.joraly.rhythmraid.mapper.SongMapperImpl;
 import ru.joraly.rhythmraid.model.Album;
@@ -14,7 +18,12 @@ import ru.joraly.rhythmraid.model.dto.request.AlbumRequest;
 import ru.joraly.rhythmraid.model.dto.response.AlbumResponse;
 import ru.joraly.rhythmraid.model.dto.response.SongResponse;
 import ru.joraly.rhythmraid.service.impl.AlbumServiceImpl;
+import ru.joraly.rhythmraid.util.Constants;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -25,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AlbumController {
     private final AlbumServiceImpl albumService;
-
+    private final MinioConfiguration minioConfiguration;
     private final AlbumMapper albumMapper;
     private final SongMapperImpl songMapperImpl;
 
@@ -56,6 +65,19 @@ public class AlbumController {
     public ResponseEntity<Album> createAlbum(@RequestBody AlbumRequest albumRequest) {
         Album createdAlbum = albumService.save(albumMapper.requestToObject(albumRequest));
         return new ResponseEntity<>(createdAlbum, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/cover")
+    public ResponseEntity<String> uploadCover(@RequestPart(value = "file") MultipartFile file, long id) throws IOException, InvalidResponseException,
+            InsufficientDataException, NoSuchAlgorithmException,
+            InvalidKeyException, ErrorResponseException,
+            XmlParserException, InternalException, ServerException {
+        if(!(Arrays.asList(Constants.IMAGE_TYPES).contains(file.getContentType()))) {
+            return new ResponseEntity<>("File is not image", HttpStatus.BAD_REQUEST);
+        }
+        String bucketName = minioConfiguration.bucketName();
+        albumService.uploadCover(bucketName, file.getInputStream(), file.getSize(), id);
+        return new ResponseEntity<>("Cover uploaded successfully", HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

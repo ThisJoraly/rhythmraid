@@ -1,16 +1,14 @@
 package ru.joraly.rhythmraid.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.joraly.rhythmraid.model.Playlist;
 import ru.joraly.rhythmraid.repository.PlaylistRepository;
 import ru.joraly.rhythmraid.service.PlaylistService;
 
 import java.util.List;
-import java.util.Optional;
 
 import static ru.joraly.rhythmraid.util.Constants.PLAYLIST_NOT_FOUND_RESPONSE;
 
@@ -35,7 +33,7 @@ public class PlaylistServiceImpl implements PlaylistService {
                     existingPlaylist.setSongPlaylists(playlist.getSongPlaylists());
                     return playlistRepository.save(existingPlaylist);
                 })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, PLAYLIST_NOT_FOUND_RESPONSE));
+                .orElseThrow(() -> new EntityNotFoundException(PLAYLIST_NOT_FOUND_RESPONSE));
     }
 
     @Transactional
@@ -44,8 +42,8 @@ public class PlaylistServiceImpl implements PlaylistService {
     }
 
     @Transactional
-    public Optional<Playlist> getById(Long id) {
-        return playlistRepository.findById(id);
+    public Playlist getById(Long id) {
+        return playlistRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(PLAYLIST_NOT_FOUND_RESPONSE));
     }
 
     @Transactional

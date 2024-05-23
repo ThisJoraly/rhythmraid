@@ -45,8 +45,9 @@ public class SongController {
 
     @GetMapping("/{id}")
     public ResponseEntity<SongResponse> getSongById(@PathVariable Long id) {
-        Optional<Song> song = songService.getById(id);
-        return song.map(value -> new ResponseEntity<>(songMapper.objectToResponse(value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Song song = songService.getById(id);
+
+        return new ResponseEntity<>(songMapper.objectToResponse(song), HttpStatus.OK);
     }
 
     @PostMapping
