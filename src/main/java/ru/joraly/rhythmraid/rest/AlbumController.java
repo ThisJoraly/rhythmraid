@@ -67,8 +67,8 @@ public class AlbumController {
         return new ResponseEntity<>(createdAlbum, HttpStatus.CREATED);
     }
 
-    @PostMapping("/cover")
-    public ResponseEntity<String> uploadCover(@RequestPart(value = "file") MultipartFile file, long id) throws IOException, InvalidResponseException,
+    @PostMapping("/{id}/cover")
+    public ResponseEntity<String> uploadCover(@RequestPart(value = "file") MultipartFile file, @PathVariable long id) throws IOException, InvalidResponseException,
             InsufficientDataException, NoSuchAlgorithmException,
             InvalidKeyException, ErrorResponseException,
             XmlParserException, InternalException, ServerException {
