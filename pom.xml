@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.joraly</groupId>
     <artifactId>rhythmraid</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1a</version>
     <name>rhythmraid</name>
     <description>rhythmraid</description>
     <properties>

@@ -1,6 +1,7 @@
 package ru.joraly.rhythmraid.model.dto.request;
 
 import lombok.Data;
+import ru.joraly.rhythmraid.model.Album;
 
 @Data
 public class SongRequest {
@@ -14,4 +15,5 @@ public class SongRequest {
     private String bucket;
 
     private String filePath;
+
 }

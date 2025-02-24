@@ -50,7 +50,6 @@ public class AlbumServiceImpl implements AlbumService {
                 .map(existingAlbum -> {
                     existingAlbum.setTitle(album.getTitle());
                     existingAlbum.setReleaseDate(album.getReleaseDate());
-                    existingAlbum.setSongAlbums(album.getSongAlbums());
                     existingAlbum.setAlbumAuthors(album.getAlbumAuthors());
                     return albumRepository.save(album);
                 })

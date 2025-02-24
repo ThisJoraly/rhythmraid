@@ -12,6 +12,4 @@ import java.util.Set;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, Long> {
-    @Query("SELECT sa.album FROM SongAlbum sa WHERE sa.song.id = :songId")
-    Set<Album> findAlbumsBySongId(@Param("songId") Long songId);
 }

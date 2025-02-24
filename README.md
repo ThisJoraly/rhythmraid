@@ -18,7 +18,7 @@ http://localhost:8080/api-docs
 ## Run PostgreSQL in Docker
 
 ```
-docker run --name postgresdocker -p 5433:5432 -e POSTGRES_PASSWORD=postgres -d postgres
+docker run --name postgresdocker -p 5430:5432 -e POSTGRES_PASSWORD=postgres -d postgres
 ```
 
 ## Run Minio in Docker

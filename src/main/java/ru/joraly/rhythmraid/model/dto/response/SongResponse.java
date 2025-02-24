@@ -1,6 +1,7 @@
 package ru.joraly.rhythmraid.model.dto.response;
 
 import lombok.Data;
+import ru.joraly.rhythmraid.model.Album;
 
 @Data
 public class SongResponse {
@@ -15,5 +16,7 @@ public class SongResponse {
     private String bucket;
 
     private String object;
+
+    private Album album;
 
 }

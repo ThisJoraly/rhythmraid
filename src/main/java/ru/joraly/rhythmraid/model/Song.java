@@ -27,8 +27,9 @@ public class Song {
 
     private String object;
 
-    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SongAlbum> songAlbums = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "album_id")
+    private Album album;
 
     @OneToMany(mappedBy = "song")
     private Set<SongAuthor> songAuthors = new HashSet<>();

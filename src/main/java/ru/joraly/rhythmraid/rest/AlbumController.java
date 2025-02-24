@@ -5,6 +5,7 @@ import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import org.simpleframework.xml.Path;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import ru.joraly.rhythmraid.model.dto.response.AlbumResponse;
 import ru.joraly.rhythmraid.model.dto.response.SongResponse;
 import ru.joraly.rhythmraid.service.impl.AlbumServiceImpl;
 import ru.joraly.rhythmraid.util.Constants;
+import ru.joraly.rhythmraid.util.FileComponent;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 public class AlbumController {
     private final AlbumServiceImpl albumService;
     private final MinioConfiguration minioConfiguration;
+    private final FileComponent fileComponent;
     private final AlbumMapper albumMapper;
     private final SongMapperImpl songMapperImpl;
 
@@ -65,6 +68,28 @@ public class AlbumController {
     public ResponseEntity<Album> createAlbum(@RequestBody AlbumRequest albumRequest) {
         Album createdAlbum = albumService.save(albumMapper.requestToObject(albumRequest));
         return new ResponseEntity<>(createdAlbum, HttpStatus.CREATED);
+    }
+    
+    @GetMapping("/{id}/cover")
+    public ResponseEntity<byte[]> getAlbumCover(@PathVariable Long id) {
+        try {
+            Optional<Album> albumOptional = albumService.getById(id);
+            if (albumOptional.isPresent()) {
+                Album album = albumOptional.get();
+                String bucketName = album.getBucket();
+                String objectName = album.getObject(); // Assuming 'object' holds the cover image path
+
+                byte[] coverBytes = fileComponent.getImage(bucketName, objectName);
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG) // Adjust content type as needed
+                        .body(coverBytes);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/{id}/cover")
