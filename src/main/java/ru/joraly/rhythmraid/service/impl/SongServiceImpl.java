@@ -8,25 +8,25 @@ import ru.joraly.rhythmraid.model.Album;
 import ru.joraly.rhythmraid.model.Song;
 import ru.joraly.rhythmraid.repository.SongRepository;
 import ru.joraly.rhythmraid.service.SongService;
+import ru.joraly.rhythmraid.util.FileComponent;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static ru.joraly.rhythmraid.util.Constants.PLAYLIST_NOT_FOUND_RESPONSE;
 import static ru.joraly.rhythmraid.util.Constants.SONG_NOT_FOUND_RESPONSE;
-
-import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class SongServiceImpl implements SongService {
 
-
     private final SongRepository songRepository;
-
+    private final FileComponent fileComponent;
 
     public Song save(Song song) {
         return songRepository.save(song);
     }
-
 
     @Transactional
     public Song replaceSong(Long id, Song song) {
@@ -53,10 +53,10 @@ public class SongServiceImpl implements SongService {
     }
 
     @Transactional
-    public Set<Album> getAlbumsBySongId(long id) {
-        return songRepository.findAlbumsBySongId(id);
+    public Optional<Album> getAlbumBySongId(Long songId) {
+        Optional<Song> songOptional = songRepository.findById(songId);
+        return songOptional.map(Song::getAlbum);
     }
-
 
     @Transactional
     public void deleteById(Long id) {

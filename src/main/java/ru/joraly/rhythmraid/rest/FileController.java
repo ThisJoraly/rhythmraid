@@ -6,13 +6,15 @@ import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-import ru.joraly.rhythmraid.configuration.MinioConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.joraly.rhythmraid.configuration.MinioConfiguration;
+import ru.joraly.rhythmraid.model.Song;
+import ru.joraly.rhythmraid.service.SongService;
+import ru.joraly.rhythmraid.service.impl.SongServiceImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,53 +27,98 @@ import java.util.List;
 @RequestMapping("/api/files")
 @RequiredArgsConstructor
 public class FileController {
+
     private final MinioConfiguration minioConfiguration;
-
     private final MinioClient minioClient;
-
+    private final SongServiceImpl songService;
 
     @PostMapping
-    public ResponseEntity<String> uploadFile(@RequestPart(value = "file") MultipartFile file) throws IOException, InvalidResponseException,
-            InsufficientDataException, NoSuchAlgorithmException,
-            InvalidKeyException, ErrorResponseException,
-            XmlParserException, InternalException, ServerException {
-        String bucketName = minioConfiguration.bucketName();
-        String objectName = file.getOriginalFilename();
-        minioClient.putObject(PutObjectArgs.builder()
-                .bucket(bucketName)
-                .object(objectName)
-                .stream(file.getInputStream(),
-                        file.getSize(), -1)
-                .build());
-        return new ResponseEntity<>("File uploaded successfully", HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<InputStreamResource> getFile(@PathVariable("id") String id) throws IOException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, ErrorResponseException, XmlParserException, InternalException, ServerException {
-        String bucketName = minioConfiguration.bucketName();
-        InputStream inputStream = minioClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(id).build());
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("attachment", id);
-        return new ResponseEntity<>(new InputStreamResource(inputStream), headers, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFile(@PathVariable("id") String id) throws IOException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, ErrorResponseException, XmlParserException, InternalException, ServerException {
-        String bucketName = minioConfiguration.bucketName();
-        minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(id).build());
-        return new ResponseEntity<>("File deleted successfully", HttpStatus.OK);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<String>> getAllFiles() throws IOException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, ErrorResponseException, XmlParserException, InternalException, ServerException {
-        String bucketName = minioConfiguration.bucketName();
-        List<String> objects = new ArrayList<>();
-        for (Result<Item> itemResult : minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).build())) {
-            Item item = itemResult.get();
-            objects.add(item.objectName());
+    public ResponseEntity<String> uploadFile(@RequestPart("file") MultipartFile file) {
+        try {
+            String bucketName = minioConfiguration.bucketName();
+            String objectName = file.getOriginalFilename();
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .build());
+            return new ResponseEntity<>("File uploaded successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("File upload failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(objects, HttpStatus.OK);
     }
 
+    @GetMapping("/audio/{bucket}/{object}")
+    public ResponseEntity<byte[]> getAudioFile(
+            @PathVariable String bucket,
+            @PathVariable String object) {
+        try {
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(object)
+                            .build());
+
+            byte[] audioBytes = stream.readAllBytes();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_TYPE, "audio/mpeg");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + object);
+
+            return new ResponseEntity<>(audioBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/audio/{id}")
+    public ResponseEntity<byte[]> getAudioFileById(
+            @PathVariable Long id) {
+        try {
+            Song song = songService.getById(id);
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(song.getBucket())
+                            .object(song.getObject())
+                            .build());
+
+            byte[] audioBytes = stream.readAllBytes();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_TYPE, "audio/mpeg");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + song.getObject());
+
+            return new ResponseEntity<>(audioBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/{bucket}/{object}")
+    public ResponseEntity<String> deleteFile(@PathVariable String bucket, @PathVariable String object) {
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(object)
+                    .build());
+            return new ResponseEntity<>("File deleted successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("File deletion failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/list/{bucket}")
+    public ResponseEntity<List<String>> getAllFiles(@PathVariable String bucket) {
+        try {
+            List<String> objects = new ArrayList<>();
+            for (Result<Item> itemResult : minioClient.listObjects(ListObjectsArgs.builder().bucket(bucket).build())) {
+                objects.add(itemResult.get().objectName());
+            }
+            return new ResponseEntity<>(objects, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
